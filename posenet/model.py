@@ -35,8 +35,8 @@ def load_config(model_ord):
 def load_model(model_id, sess, model_dir=MODEL_DIR):
     model_ord = model_id_to_ord(model_id)
     model_cfg = load_config(model_ord)
-    model_path = os.path.join(model_dir, 'model-%s.pb' % model_cfg['checkpoint_name'])
-    #model_path = model_dir + '/' + 'model-%s.pb' % model_cfg['checkpoint_name'] + 'txt' 이 코드가 실제로 존재하는 path를 가리킨다.
+    #model_path = os.path.join(model_dir, 'model-%s.pb' % model_cfg['checkpoint_name'])
+    model_path = model_dir + '/' + 'model-%s.pb' % model_cfg['checkpoint_name'] + 'txt' #이 코드가 실제로 존재하는 path를 가리킨다.
     if not os.path.exists(model_path):
         print('Cannot find model file %s, converting from tfjs...' % model_path)
         from posenet.converter.tfjs2python import convert
