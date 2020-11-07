@@ -9,7 +9,8 @@ import tempfile
 
 from posenet.converter.config import load_config
 
-BASE_DIR = os.path.join(os.sep, tempfile.gettempdir(), '_posenet_weights')
+#BASE_DIR = os.path.join(os.sep, tempfile.gettempdir(), '_posenet_weights')
+BASE_DIR = tempfile.gettempdir() + '/' + '_posenet_weights'
 
 tf.compat.v1.disable_eager_execution()
 
@@ -44,7 +45,8 @@ def to_output_strided_layers(convolution_def, output_stride):
 
 
 def load_variables(chkpoint, base_dir=BASE_DIR):
-    manifest_path = os.path.join(os.sep, base_dir, chkpoint, "manifest.json")
+    #manifest_path = os.path.join(os.sep, base_dir, chkpoint, "manifest.json")
+    manifest_path = base_dir + '/' + chkpoint + '/' + 'manifest.json'
     if not os.path.exists(manifest_path):
         print('Weights for checkpoint %s are not downloaded. Downloading to %s ...' % (chkpoint, base_dir))
         from posenet.converter.wget import download
@@ -57,7 +59,8 @@ def load_variables(chkpoint, base_dir=BASE_DIR):
     # with tf.compat.v1.variable_scope(None, 'MobilenetV1'):
     for x in variables:
         filename = variables[x]["filename"]
-        byte = open(os.path.join(os.sep, base_dir, chkpoint, filename), 'rb').read()
+        #byte = open(os.path.join(os.sep, base_dir, chkpoint, filename), 'rb').read()
+        byte = open(base_dir + '/' + chkpoint + '/' + filename), 'rb').read()
         fmt = str(int(len(byte) / struct.calcsize('f'))) + 'f'
         d = struct.unpack(fmt, byte)
         d = tf.compat.v1.cast(d, tf.compat.v1.float32)
@@ -178,7 +181,8 @@ def convert(model_id, model_dir, check=False):
                 }
             )
 
-            save_path = os.path.join(os.sep, model_dir, 'checkpoints', 'model-%s.ckpt' % chkpoint)
+            #save_path = os.path.join(os.sep, model_dir, 'checkpoints', 'model-%s.ckpt' % chkpoint)
+            save_path = model + '/' + 'checkpoints' + '/' + 'model-%s.ckpt' % chkpoint
             if not os.path.exists(os.path.dirname(save_path)):
                 os.makedirs(os.path.dirname(save_path))
             checkpoint_path = saver.save(sess, save_path, write_state=False)
@@ -187,14 +191,16 @@ def convert(model_id, model_dir, check=False):
 
             # Freeze graph and write our final model file
             freeze_graph(
-                input_graph=os.path.join(os.sep, model_dir, "model-%s.pbtxt" % chkpoint),
+                #input_graph=os.path.join(os.sep, model_dir, "model-%s.pbtxt" % chkpoint),
+                input_graph = model_dir + '/' + 'model-%s.ptbxt' % chkpoint,
                 input_saver="",
                 input_binary=False,
                 input_checkpoint=checkpoint_path,
                 output_node_names='heatmap,offset_2,displacement_fwd_2,displacement_bwd_2',
                 restore_op_name="save/restore_all",
                 filename_tensor_name="save/Const:0",
-                output_graph=os.path.join(os.sep, model_dir, "model-%s.pb" % chkpoint),
+                #output_graph=os.path.join(os.sep, model_dir, "model-%s.pb" % chkpoint),
+                output_graph = model_dir + '/' + 'model-%s.pb' % chkpoint,
                 clear_devices=True,
                 initializer_nodes="")
 
@@ -220,3 +226,4 @@ def convert(model_id, model_dir, check=False):
                 print(heatmaps_result[0:1, 0:1, :])
                 print(heatmaps_result.shape)
                 print(np.mean(heatmaps_result))
+                print('--------------------------Convert End-----------------------------')
